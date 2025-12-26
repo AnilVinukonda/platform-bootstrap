@@ -8,6 +8,9 @@ server for container orchestration and CI/CD.
 - Disable swap as required by Kubernetes
 - Configure UFW firewall with minimal required ports
 - Install and configure Docker with non-root access
+- Configure a non-root user with:
+  - SSH key-based access
+  - Passwordless sudo privileges
 - Deploy a test NGINX container to validate Docker setup
 
 ## Usage
