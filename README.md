@@ -12,4 +12,7 @@ and deploy a containerised application on Kubernetes using Helm and Jenkins.
 - Disabled swap for Kubernetes
 - Configured UFW firewall with minimal required ports
 - Installed Docker and enabled non-root access
+- Configured a non-root user with:
+  - SSH key-based access
+  - Passwordless sudo privileges
 - Deployed a test NGINX container to validate Docker setup
