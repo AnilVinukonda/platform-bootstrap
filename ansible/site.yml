@@ -9,3 +9,13 @@
       apt:
         upgrade: dist
 
+    - name: Disable swap immediately
+      command: swapoff -a
+      when: ansible_swaptotal_mb > 0
+
+    - name: Disable swap permanently
+      replace:
+        path: /etc/fstab
+        regexp: '^([^#].*swap.*)$'
+        replace: '# \1'
+
