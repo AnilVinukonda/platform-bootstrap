@@ -19,3 +19,29 @@
         regexp: '^([^#].*swap.*)$'
         replace: '# \1'
 
+
+    - name: Allow SSH
+      ufw:
+        rule: allow
+        port: "22"
+        proto: tcp
+
+    - name: Allow Kubernetes API server
+      ufw:
+        rule: allow
+        port: "6443"
+        proto: tcp
+
+    - name: Allow Kubelet API
+      ufw:
+        rule: allow
+        port: "10250"
+        proto: tcp
+
+    - name: Enable UFW
+      ufw:
+        state: enabled
+        policy: deny
+
+
+          
