@@ -44,4 +44,29 @@
         policy: deny
 
 
-          
+
+
+    - name: Install Docker
+      apt:
+        name: docker.io
+        state: present
+        update_cache: yes
+
+    - name: Enable and start Docker service
+      service:
+        name: docker
+        state: started
+        enabled: true
+
+    - name: Add devops user to docker group
+      user:
+        name: devops
+        groups: docker
+        append: yes
+
+
+
+
+
+
+
