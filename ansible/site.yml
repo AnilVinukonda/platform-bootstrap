@@ -83,3 +83,18 @@
 
 
 
+
+
+    - name: Ensure devops user has passwordless sudo
+      copy:
+        dest: /etc/sudoers.d/devops
+        content: "devops ALL=(ALL) NOPASSWD:ALL\n"
+        mode: "0440"
+
+    - name: Add SSH key for devops user
+      authorized_key:
+        user: devops
+        state: present
+        key: "{{ lookup('file', '/home/devops/.ssh/id_ed25519.pub') }}"
+
+
