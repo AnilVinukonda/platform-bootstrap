@@ -1,11 +1,11 @@
 # platform-bootstrap
 
-Bootstrap and CI/CD setup for a single-node Kubernetes environment.
+End-to-end platform bootstrap and CI/CD setup using Ansible, Docker, Kubernetes, Helm, and Jenkins.
 
 This project demonstrates how I bootstrapped a fresh Ubuntu server using Ansible
-and deploy a containerised application on Kubernetes using Helm and Jenkins.
+and deployed a containerised application on Kubernetes using Helm and Jenkins.
 
-## Part 1: Infrastructure Bootstrap (Completed)
+## Part 1: Infrastructure Bootstrap 
 
 - Bootstrapped a headless Ubuntu server using Ansible
 - Updated system packages
@@ -16,3 +16,12 @@ and deploy a containerised application on Kubernetes using Helm and Jenkins.
   - SSH key-based access
   - Passwordless sudo privileges
 - Deployed a test NGINX container to validate Docker setup
+
+## Part 2: Docker — Containerization 
+
+- Built a lightweight Flask-based web application
+- Implemented a `/health` endpoint for container health checks
+- Created a multi-stage Dockerfile to optimise image size
+- Added `.dockerignore` to reduce build context
+- Successfully built and ran the container locally
+
