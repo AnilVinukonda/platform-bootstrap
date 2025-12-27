@@ -25,3 +25,133 @@ and deployed a containerised application on Kubernetes using Helm and Jenkins.
 - Added `.dockerignore` to reduce build context
 - Successfully built and ran the container locally
 
+
+
+## Part 3: Kubernetes + Helm Deployment
+
+In this part, the containerised Flask application is deployed to a single-node Kubernetes cluster (MicroK8s) using Helm.
+
+This demonstrates core Kubernetes deployment patterns, service exposure, ingress routing, configuration management, and autoscaling.
+
+### Kubernetes Resources Used
+
+- Deployment – Replica-based application workload
+- Service (ClusterIP) – Internal service exposure
+- Ingress (NGINX) – External HTTP access
+- ConfigMap – Application configuration
+- Horizontal Pod Autoscaler (HPA) – CPU-based autoscaling
+- Helm – Application packaging and lifecycle management
+
+
+### Kubernetes Components
+
+#### Deployment
+
+- Initial replicas: 2
+- Container image: `platform-bootstrap-app:latest`
+- Health checks:
+  - `/health` endpoint used for liveness and readiness probes
+- Resource management:
+  - CPU and memory requests & limits defined
+- Configuration:
+  - Application configuration injected via ConfigMap
+
+#### Service
+
+- Type: ClusterIP
+- Port: 8080
+- Routes traffic to application pods using Kubernetes labels
+
+#### Ingress
+
+- Ingress controller: NGINX
+- Host: `app.local`
+- Path: `/`
+- Provides HTTP access to the application
+
+> **Note:** `app.local` is mapped to `127.0.0.1` in `/etc/hosts` for local testing.
+
+#### ConfigMap
+
+- Stores non-sensitive application configuration:
+  - `APP_NAME`
+  - `APP_ENV`
+- Injected into pods using `envFrom`
+
+#### Horizontal Pod Autoscaler (HPA)
+
+- Minimum replicas: 2
+- Maximum replicas: 5
+- Metric: CPU utilization
+- Target CPU threshold: 50%
+
+### Helm Chart Structure
+
+The application is packaged and deployed using a Helm chart with the following structure:
+
+```text
+helm/platform-bootstrap-app/
+├── Chart.yaml
+├── values.yaml
+└── templates/
+    ├── deployment.yaml
+    ├── service.yaml
+    ├── ingress.yaml
+    ├── configmap.yaml
+    └── hpa.yaml
+
+
+### Deployment Steps
+
+#### Configure kubeconfig for MicroK8s
+
+```bash
+microk8s config > ~/.kube/config
+chmod 600 ~/.kube/config
+
+Install the Helm release
+
+helm install platform-bootstrap-app helm/platform-bootstrap-app
+
+Upgrade the release after changes
+
+helm upgrade platform-bootstrap-app helm/platform-bootstrap-app
+
+### Verification Steps
+
+#### Verify Kubernetes resources
+
+```bash
+kubectl get deployment
+kubectl get pods
+kubectl get svc
+kubectl get ingress
+kubectl get configmap
+kubectl get hpa
+
+### Access the Application
+
+Once the deployment is verified, the application can be accessed via the ingress.
+
+```bash
+curl http://app.local
+curl http://app.local/health
+
+### Observed Behaviour
+
+During load testing, the following behaviour was observed:
+
+- When CPU usage exceeded 50%:
+  - Horizontal Pod Autoscaler (HPA) automatically scaled the application pods
+  - Replica count increased up to a maximum of 5 pods
+
+- After the load stopped:
+  - CPU utilisation dropped below the target threshold
+  - Pods gradually scaled back down to the minimum of 2 replicas
+
+This confirms that:
+
+- Metrics Server is operational
+- HPA is correctly configured and functioning as expected
+- Kubernetes scale-up and scale-down behaviour follows stabilization rules
+
