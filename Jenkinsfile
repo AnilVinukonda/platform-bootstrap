@@ -7,6 +7,7 @@ pipeline {
     }
 
     stages {
+
         stage('Checkout') {
             steps {
                 checkout scm
@@ -17,9 +18,26 @@ pipeline {
             steps {
                 sh '''
                   echo "Building Docker image..."
-                  docker version
                   docker build -t ${IMAGE_NAME}:${IMAGE_TAG} ./app
-                  docker images | grep ${IMAGE_NAME}
+                '''
+            }
+        }
+
+        stage('Health Test') {
+            steps {
+                sh '''
+                  echo "Running container for health test"
+                  docker rm -f test-app || true
+
+                  docker run -d --name test-app -p 18080:8080 ${IMAGE_NAME}:${IMAGE_TAG}
+
+                  sleep 5
+
+                  echo "Calling /health"
+                  curl -f http://localhost:18080/health
+
+                  echo "Health check passed"
+                  docker rm -f test-app
                 '''
             }
         }
