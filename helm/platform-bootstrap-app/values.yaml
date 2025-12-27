@@ -1,9 +1,9 @@
 replicaCount: 2
 
 image:
-  repository: platform-bootstrap-app
+  repository: avinuko/platform-bootstrap-app
   tag: latest
-  pullPolicy: Never
+  pullPolicy: IfNotPresent
 
 service:
   type: ClusterIP

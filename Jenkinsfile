@@ -3,8 +3,8 @@ pipeline {
 
     environment {
         IMAGE_NAME = "platform-bootstrap-app"
+        DOCKER_REPO = "avinuko/platform-bootstrap-app"
         IMAGE_TAG  = "${BUILD_NUMBER}"
-        DOCKER_CREDS = "dockerhub-credentials"
     }
 
     stages {
@@ -29,7 +29,6 @@ pipeline {
             steps {
                 sh '''
                   set -eux
-
                   echo "Starting test container"
                   docker rm -f test-app || true
                   docker run -d --name test-app ${IMAGE_NAME}:${IMAGE_TAG}
@@ -44,7 +43,7 @@ pipeline {
                     sleep 1
                   done
 
-                  echo "Health check FAILED"
+                  echo "Health check failed"
                   docker logs test-app || true
                   exit 1
                 '''
@@ -59,15 +58,34 @@ pipeline {
         stage('Docker Push') {
             steps {
                 withCredentials([usernamePassword(
-                    credentialsId: "${DOCKER_CREDS}",
+                    credentialsId: 'dockerhub-credentials',
                     usernameVariable: 'DOCKER_USER',
                     passwordVariable: 'DOCKER_PASS'
                 )]) {
                     sh '''
                       set -eux
                       echo "$DOCKER_PASS" | docker login -u "$DOCKER_USER" --password-stdin
-                      docker tag ${IMAGE_NAME}:${IMAGE_TAG} $DOCKER_USER/${IMAGE_NAME}:${IMAGE_TAG}
-                      docker push $DOCKER_USER/${IMAGE_NAME}:${IMAGE_TAG}
+                      docker tag ${IMAGE_NAME}:${IMAGE_TAG} ${DOCKER_REPO}:${IMAGE_TAG}
+                      docker push ${DOCKER_REPO}:${IMAGE_TAG}
+                    '''
+                }
+            }
+        }
+
+        stage('Helm Deploy') {
+            steps {
+                withCredentials([file(
+                    credentialsId: 'kubeconfig',
+                    variable: 'KUBECONFIG'
+                )]) {
+                    sh '''
+                      set -eux
+                      helm upgrade --install platform-bootstrap \
+                        ./helm/platform-bootstrap-app \
+                        --namespace platform-bootstrap \
+                        --create-namespace \
+                        --set image.repository=${DOCKER_REPO} \
+                        --set image.tag=${IMAGE_TAG}
                     '''
                 }
             }
