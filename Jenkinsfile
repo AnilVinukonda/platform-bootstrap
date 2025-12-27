@@ -26,19 +26,28 @@ pipeline {
         stage('Health Test') {
             steps {
                 sh '''
-                  echo "Running container for health test"
+                  set -eux
+
                   docker rm -f test-app || true
+                  docker run -d --name test-app ${IMAGE_NAME}:${IMAGE_TAG}
 
-                  docker run -d --name test-app -p 18080:8080 ${IMAGE_NAME}:${IMAGE_TAG}
+                  for i in $(seq 1 20); do
+                    IP=$(docker inspect -f '{{range.NetworkSettings.Networks}}{{.IPAddress}}{{end}}' test-app)
+                    if curl -fsS "http://$IP:8080/health" >/dev/null; then
+                      echo "Health check OK"
+                      exit 0
+                    fi
+                    sleep 1
+                  done
 
-                  sleep 5
-
-                  echo "Calling /health"
-                  curl -f http://localhost:18080/health
-
-                  echo "Health check passed"
-                  docker rm -f test-app
+                  docker logs test-app || true
+                  exit 1
                 '''
+            }
+            post {
+                always {
+                    sh 'docker rm -f test-app || true'
+                }
             }
         }
     }
