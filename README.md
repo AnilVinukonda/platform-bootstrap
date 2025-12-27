@@ -2,10 +2,12 @@
 
 End-to-end platform bootstrap and CI/CD setup using Ansible, Docker, Kubernetes, Helm, and Jenkins.
 
-This project demonstrates how I bootstrapped a fresh Ubuntu server using Ansible
-and deployed a containerised application on Kubernetes using Helm and Jenkins.
+## Purpose
 
-## Part 1: Infrastructure Bootstrap 
+This repository demonstrates how I bootstrapped a fresh Ubuntu server using Ansible
+and deployed a containerised Flask application on Kubernetes using Helm and Jenkins.
+
+## Part 1: Infrastructure Bootstrap
 
 - Bootstrapped a headless Ubuntu server using Ansible
 - Updated system packages
@@ -17,7 +19,7 @@ and deployed a containerised application on Kubernetes using Helm and Jenkins.
   - Passwordless sudo privileges
 - Deployed a test NGINX container to validate Docker setup
 
-## Part 2: Docker — Containerization 
+## Part 2: Docker — Containerization
 
 - Built a lightweight Flask-based web application
 - Implemented a `/health` endpoint for container health checks
@@ -25,11 +27,9 @@ and deployed a containerised application on Kubernetes using Helm and Jenkins.
 - Added `.dockerignore` to reduce build context
 - Successfully built and ran the container locally
 
-
-
 ## Part 3: Kubernetes + Helm Deployment
 
-In this part, the containerised Flask application is deployed to a single-node Kubernetes cluster (MicroK8s) using Helm.
+The containerised Flask application is deployed to a single-node Kubernetes cluster (MicroK8s) using Helm.
 
 This demonstrates core Kubernetes deployment patterns, service exposure, ingress routing, configuration management, and autoscaling.
 
@@ -42,11 +42,9 @@ This demonstrates core Kubernetes deployment patterns, service exposure, ingress
 - Horizontal Pod Autoscaler (HPA) – CPU-based autoscaling
 - Helm – Application packaging and lifecycle management
 
-
 ### Kubernetes Components
 
 #### Deployment
-
 - Initial replicas: 2
 - Container image: `platform-bootstrap-app:latest`
 - Health checks:
@@ -57,37 +55,30 @@ This demonstrates core Kubernetes deployment patterns, service exposure, ingress
   - Application configuration injected via ConfigMap
 
 #### Service
-
 - Type: ClusterIP
 - Port: 8080
 - Routes traffic to application pods using Kubernetes labels
 
 #### Ingress
-
 - Ingress controller: NGINX
 - Host: `app.local`
 - Path: `/`
-- Provides HTTP access to the application
-
-> **Note:** `app.local` is mapped to `127.0.0.1` in `/etc/hosts` for local testing.
+- Provides HTTP access to the application  
+  Note: `app.local` is mapped to `127.0.0.1` in `/etc/hosts` for local testing.
 
 #### ConfigMap
-
-- Stores non-sensitive application configuration:
-  - `APP_NAME`
-  - `APP_ENV`
-- Injected into pods using `envFrom`
+Stores non-sensitive application configuration:
+- `APP_NAME`
+- `APP_ENV`  
+Injected into pods using `envFrom`.
 
 #### Horizontal Pod Autoscaler (HPA)
-
 - Minimum replicas: 2
 - Maximum replicas: 5
-- Metric: CPU utilization
+- Metric: CPU utilisation
 - Target CPU threshold: 50%
 
 ### Helm Chart Structure
-
-The application is packaged and deployed using a Helm chart with the following structure:
 
 ```text
 helm/platform-bootstrap-app/
@@ -99,8 +90,7 @@ helm/platform-bootstrap-app/
     ├── ingress.yaml
     ├── configmap.yaml
     └── hpa.yaml
-
-
+```
 ### Deployment Steps
 
 #### Configure kubeconfig for MicroK8s
@@ -108,15 +98,15 @@ helm/platform-bootstrap-app/
 ```bash
 microk8s config > ~/.kube/config
 chmod 600 ~/.kube/config
-
-Install the Helm release
-
+```
+#### Install the Helm release
+```bash
 helm install platform-bootstrap-app helm/platform-bootstrap-app
-
-Upgrade the release after changes
-
+```
+#### Upgrade the release after changes
+```bash
 helm upgrade platform-bootstrap-app helm/platform-bootstrap-app
-
+```
 ### Verification Steps
 
 #### Verify Kubernetes resources
@@ -128,7 +118,7 @@ kubectl get svc
 kubectl get ingress
 kubectl get configmap
 kubectl get hpa
-
+```
 ### Access the Application
 
 Once the deployment is verified, the application can be accessed via the ingress.
@@ -136,7 +126,7 @@ Once the deployment is verified, the application can be accessed via the ingress
 ```bash
 curl http://app.local
 curl http://app.local/health
-
+```
 ### Observed Behaviour
 
 During load testing, the following behaviour was observed:
@@ -153,7 +143,7 @@ This confirms that:
 
 - Metrics Server is operational
 - HPA is correctly configured and functioning as expected
-- Kubernetes scale-up and scale-down behaviour follows stabilization rules
+- Kubernetes scale-up and scale-down behaviour follows stabilisation rules
 
 ## Part 4: Secrets Management
 
@@ -185,7 +175,7 @@ stringData:
   DB_USERNAME: {{ .Values.secrets.dbUsername | quote }}
   DB_PASSWORD: {{ .Values.secrets.dbPassword | quote }}
   APP_SECRET_KEY: {{ .Values.secrets.appSecretKey | quote }}
-
+```
 
 ### Injecting Secrets into Pods
 
@@ -198,7 +188,7 @@ envFrom:
       name: platform-bootstrap-app
   - secretRef:
       name: platform-bootstrap-app-secrets
-
+```
 
 ### Verification Steps
 
@@ -207,13 +197,12 @@ envFrom:
 ```bash
 kubectl get secret platform-bootstrap-app-secrets
 kubectl describe secret platform-bootstrap-app-secrets
-
-
-Verify Secrets Inside Pod
-
+```
+#### Verify Secrets Inside Pod
+``` bash
 kubectl exec -it <pod-name> -- env | grep -E 'DB_|APP_'
-
-Outcome
+```
+### Outcome
 
 - Kubernetes Secrets are securely managed using Helm
 - Secrets are injected into pods using environment variables
