@@ -31,6 +31,8 @@ spec:
           envFrom:
             - configMapRef:
                 name: {{ include "platform-bootstrap-app.fullname" . }}
+            - secretRef:
+                name: {{ include "platform-bootstrap-app.fullname" . }}-secrets      
           readinessProbe:
             httpGet:
               path: /health

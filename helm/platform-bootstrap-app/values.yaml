@@ -32,3 +32,11 @@ autoscaling:
   maxReplicas: 5
   targetCPUUtilizationPercentage: 50
 
+
+secrets:
+  dbUsername: dbuser
+  dbPassword: dbadminpassword123
+  appSecretKey: change-me
+
+
+

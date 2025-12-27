@@ -155,3 +155,69 @@ This confirms that:
 - HPA is correctly configured and functioning as expected
 - Kubernetes scale-up and scale-down behaviour follows stabilization rules
 
+## Part 4: Secrets Management
+
+Sensitive configuration is managed using Kubernetes Secrets and Helm, ensuring credentials are never hardcoded in source code, images, or ConfigMaps. 
+This follows security best practices and the 12-Factor App principles.
+
+### Secrets Used
+
+The following sensitive values are stored as Kubernetes Secrets:
+
+- `DB_USERNAME`
+- `DB_PASSWORD`
+- `APP_SECRET_KEY`
+
+These values are templated via Helm and can be **overridden per environment**
+without modifying application code or manifests.
+
+### Helm-Based Secret Management
+
+Secrets are created dynamically at deploy time using Helm templates:
+
+```yaml
+apiVersion: v1
+kind: Secret
+metadata:
+  name: {{ include "platform-bootstrap-app.fullname" . }}-secrets
+type: Opaque
+stringData:
+  DB_USERNAME: {{ .Values.secrets.dbUsername | quote }}
+  DB_PASSWORD: {{ .Values.secrets.dbPassword | quote }}
+  APP_SECRET_KEY: {{ .Values.secrets.appSecretKey | quote }}
+
+
+### Injecting Secrets into Pods
+
+Secrets are injected into the application container as environment variables
+using `envFrom.secretRef`.
+
+```yaml
+envFrom:
+  - configMapRef:
+      name: platform-bootstrap-app
+  - secretRef:
+      name: platform-bootstrap-app-secrets
+
+
+### Verification Steps
+
+#### Verify Secret Exists
+
+```bash
+kubectl get secret platform-bootstrap-app-secrets
+kubectl describe secret platform-bootstrap-app-secrets
+
+
+Verify Secrets Inside Pod
+
+kubectl exec -it <pod-name> -- env | grep -E 'DB_|APP_'
+
+Outcome
+
+- Kubernetes Secrets are securely managed using Helm
+- Secrets are injected into pods using environment variables
+- Application remains fully functional after secrets integration
+- Security best practices are enforced throughout the deployment lifecycle
+
+
