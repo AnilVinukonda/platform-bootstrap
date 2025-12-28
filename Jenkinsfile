@@ -8,7 +8,7 @@ pipeline {
     KUBECONFIG   = "/var/jenkins_home/.kube/config"
     HELM_RELEASE = "platform-bootstrap-app"
     K8S_NS       = "default"
-    APP_PORT     = "5000"
+    APP_PORT     = "8080"
   }
 
   stages {
