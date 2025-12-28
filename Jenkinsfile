@@ -2,8 +2,8 @@ pipeline {
   agent any
 
   environment {
-    KUBECONFIG = "/var/jenkins_home/.kube/config"
     IMAGE_NAME = "avinuko/platform-bootstrap-app"
+    KUBECONFIG = "/var/jenkins_home/.kube/config"
   }
 
   stages {
@@ -23,14 +23,21 @@ pipeline {
       }
     }
 
-    stage('Push Image') {
+    stage('Push Docker Image') {
       steps {
-        sh '''
-          set -eux
-          docker tag ${IMAGE_NAME}:${BUILD_NUMBER} ${IMAGE_NAME}:latest
-          docker push ${IMAGE_NAME}:${BUILD_NUMBER}
-          docker push ${IMAGE_NAME}:latest
-        '''
+        withCredentials([usernamePassword(
+          credentialsId: 'docker-jenkins',
+          usernameVariable: 'DOCKER_USER',
+          passwordVariable: 'DOCKER_PASS'
+        )]) {
+          sh '''
+            set -eux
+            echo "$DOCKER_PASS" | docker login -u "$DOCKER_USER" --password-stdin
+            docker tag ${IMAGE_NAME}:${BUILD_NUMBER} ${IMAGE_NAME}:latest
+            docker push ${IMAGE_NAME}:${BUILD_NUMBER}
+            docker push ${IMAGE_NAME}:latest
+          '''
+        }
       }
     }
 
