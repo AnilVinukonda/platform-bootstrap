@@ -203,10 +203,65 @@ kubectl describe secret platform-bootstrap-app-secrets
 kubectl exec -it <pod-name> -- env | grep -E 'DB_|APP_'
 ```
 ### Outcome
-
 - Kubernetes Secrets are securely managed using Helm
 - Secrets are injected into pods using environment variables
 - Application remains fully functional after secrets integration
 - Security best practices are enforced throughout the deployment lifecycle
+
+## Part 5: Jenkins — CI/CD Pipeline
+
+### Objective
+
+Automate application delivery using Jenkins:
+
+- Build Docker image
+- Validate application health (`/health`)
+- Push image to DockerHub
+- Deploy to Kubernetes using Helm
+
+---
+
+### Pipeline Overview
+
+The CI/CD pipeline is implemented using a **Declarative Jenkinsfile** at the repository root.
+
+Only **healthy and tested builds** are deployed.
+
+---
+
+### Pipeline Stages
+
+1. **Build**
+   - Builds Docker image
+   - Tags image using `${BUILD_NUMBER}`
+
+2. **Test**
+   - Runs container locally
+   - Validates `/health` endpoint
+   - Fails pipeline on error
+
+3. **Push**
+   - Pushes image to DockerHub
+   - Uses Jenkins Credentials Manager
+
+4. **Deploy**
+   - Deploys the application using Helm:
+   ``` bash
+   helm upgrade --install platform-bootstrap-app helm/platform-bootstrap-app
+   ```
+---
+
+### Outcome
+- Fully automated CI/CD pipeline
+- Secure image publishing
+- Health-checked Kubernetes deployment
+- Production-aligned delivery workflow
+
+   
+
+
+
+
+
 
 
