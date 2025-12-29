@@ -1,5 +1,37 @@
-# Vim swap files
+# =====================
+# Editor / OS files
+# =====================
 *.swp
 *.swo
 *~
+.DS_Store
+.vscode/
+.idea/
+
+# =====================
+# Python artifacts
+# =====================
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.env
+venv/
+.envrc
+
+# =====================
+# Logs & runtime
+# =====================
+*.log
+
+# =====================
+# Docker (local only)
+# =====================
+docker-compose.override.yml
+
+# =====================
+# Test / coverage
+# =====================
+.coverage
+htmlcov/
 
