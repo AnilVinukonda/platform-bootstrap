@@ -1,0 +1,29 @@
+# Git
+.git
+.gitignore
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.env
+venv/
+.envrc
+
+# Editor / OS files
+.vscode/
+.idea/
+.DS_Store
+
+# Jenkins / CI
+jenkins/
+Jenkinsfile
+
+# Helm & Infra (not needed inside app image)
+helm/
+ansible/
+
+# Docs
+README.md
+
